@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisation de l'incertitude des sources</title>
+
+    <!-- Reveal.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/theme/white.css">
+
+    <style>
+        /* ============================================
+           DESIGN SYSTEM - Présentation Colloque 2025
+           ============================================ */
+
+        :root {
+            /* Palette de couleurs */
+            --main-color: #2c3e50;
+            --accent-color: #3498db;
+            --light-gray: #ecf0f1;
+            --dark-gray: #7f8c8d;
+
+            /* Échelle typographique */
+            --font-size-h1: 1.8em;
+            --font-size-h2: 1.4em;
+            --font-size-h3: 1.3em;
+            --font-size-h4: 1em;
+            --font-size-h5: 1.1em;
+            --font-size-body: 1em;
+            --font-size-small: 0.8em;
+            --font-size-micro: 0.6em;
+
+            /* Espacement modulaire */
+            --spacing-xs: 0.5em;
+            --spacing-sm: 1em;
+            --spacing-md: 2em;
+            --spacing-lg: 3em;
+
+            /* Max-width standardisé */
+            --width-narrow: 75%;
+            --width-standard: 85%;
+            --width-wide: 90%;
+
+            /* Line-height cohérent */
+            --line-height-headings: 1.2;
+            --line-height-body: 1.6;
+            --line-height-code: 1.8;
+        }
+
+        /* ============================================
+           BASE STYLES
+           ============================================ */
+
+        .reveal {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 32px;
+            color: var(--main-color);
+        }
+
+        .reveal .slides {
+            text-align: left;
+        }
+
+        /* Prévenir les débordements */
+        .reveal .slides section {
+            height: 100%;
+            overflow: hidden;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+
+        /* Images responsives globales */
+        .reveal img {
+            max-width: 100%;
+            max-height: 100%;
+            height: auto;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Numérotation des slides en bas à gauche */
+        .reveal .slide-number {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 0.5em;
+            color: var(--dark-gray);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+
+        /* ============================================
+           HIÉRARCHIE TYPOGRAPHIQUE
+           ============================================ */
+
+        /* H1 - Titres principaux */
+        .reveal h1 {
+            font-size: var(--font-size-h1);
+            font-weight: 600;
+            color: var(--main-color);
+            margin-bottom: var(--spacing-sm);
+            line-height: var(--line-height-headings);
+        }
+
+        /* H2 - Sous-titres */
+        .reveal h2 {
+            font-size: var(--font-size-h2);
+            font-weight: 400;
+            color: var(--dark-gray);
+            margin-bottom: var(--spacing-md);
+            line-height: var(--line-height-headings);
+        }
+
+        /* H3 - Sections standard */
+        .reveal h3 {
+            font-size: var(--font-size-h3);
+            font-weight: 600;
+            color: var(--main-color);
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+            line-height: var(--line-height-headings);
+        }
+
+        /* H3 - Sections principales (Partie 1, 2) */
+        .reveal .part-divider h3 {
+            font-size: var(--font-size-h2);
+            color: var(--accent-color);
+            margin-bottom: var(--spacing-md);
+        }
+
+        /* H4 - Sous-sections italiques */
+        .reveal h4 {
+            font-size: var(--font-size-h4);
+            font-weight: 400;
+            color: var(--dark-gray);
+            margin-bottom: var(--spacing-sm);
+            font-style: italic;
+            line-height: var(--line-height-body);
+        }
+
+        /* H5 - Méthodologie / CLI */
+        .reveal h5 {
+            font-size: var(--font-size-h5);
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: var(--line-height-headings);
+        }
+
+        /* Superscript */
+        .reveal sup {
+            font-size: 0.7em;
+            color: var(--accent-color);
+        }
+
+        /* ============================================
+           SLIDE TITRE (Slide 1)
+           ============================================ */
+
+        .reveal .title-slide {
+            text-align: center;
+        }
+
+        .reveal .author-info {
+            margin-top: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-small);
+            color: var(--main-color);
+        }
+
+        .reveal .author-name {
+            font-size: var(--font-size-h5);
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .reveal .affiliation {
+            font-size: var(--font-size-small);
+            color: var(--dark-gray);
+            line-height: var(--line-height-body);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        /* ============================================
+           CITATIONS & BLOCKQUOTES
+           ============================================ */
+
+        .reveal blockquote {
+            margin: var(--spacing-md) auto;
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: var(--font-size-body);
+            font-style: italic;
+            line-height: var(--line-height-body);
+            border-left: 4px solid var(--accent-color);
+            background: var(--light-gray);
+            text-align: left;
+            max-width: var(--width-standard);
+        }
+
+        .reveal .citation-source {
+            margin-top: var(--spacing-md);
+            font-size: var(--font-size-micro);
+            font-style: normal;
+            color: var(--dark-gray);
+            text-align: right;
+        }
+
+        .reveal .citation-block {
+            font-size: var(--font-size-small);
+            font-style: italic;
+            line-height: var(--line-height-body);
+            margin: var(--spacing-md) auto;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-left: 4px solid var(--accent-color);
+            background: var(--light-gray);
+            max-width: var(--width-standard);
+        }
+
+        .reveal .source-ref {
+            font-size: var(--font-size-micro);
+            color: var(--dark-gray);
+            margin-top: var(--spacing-sm);
+            font-style: normal;
+        }
+
+        .reveal .highlight-term {
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        /* ============================================
+           LISTES
+           ============================================ */
+
+        /* Listes standard avec bordure */
+        .reveal .structure-list,
+        .reveal .key-points {
+            list-style: none;
+            padding: 0;
+            margin: var(--spacing-md) auto;
+            max-width: var(--width-standard);
+            text-align: left;
+        }
+
+        .reveal .structure-list li,
+        .reveal .key-points li {
+            font-size: var(--font-size-small);
+            line-height: var(--line-height-body);
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            border-left: 4px solid var(--accent-color);
+            background: var(--light-gray);
+        }
+
+        .reveal .part-number {
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        /* ============================================
+           IMAGES - RESPONSIVE & UNIFORMISÉ
+           ============================================ */
+
+        /* Container flex pour slides avec images */
+        .reveal .image-slide-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        /* Images principales (cartes, graphes, visualisations) */
+        .reveal .main-image {
+            width: 100%;
+            max-width: 100%;
+            max-height: 70vh;
+            height: auto;
+            object-fit: contain;
+            margin: 0 auto;
+            display: block;
+        }
+
+        /* Images de documents d'archives (plus petites) */
+        .reveal .document-image {
+            width: 90%;
+            max-width: 90%;
+            max-height: 65vh;
+            height: auto;
+            object-fit: contain;
+            margin: 0 auto;
+            display: block;
+        }
+
+        /* Images moyennes (illustrations, schémas) - RESPONSIVE */
+        .reveal .metro-image {
+            width: 85%;
+            max-width: none;
+            max-height: 60vh;
+            height: auto;
+            object-fit: contain;
+            margin: 0 auto;
+            display: block;
+        }
+
+        /* ========================================
+           MEDIA QUERIES RESPONSIVE COMPLÈTES
+           ======================================== */
+
+        /* Très petits écrans (smartphones portrait) */
+        @media (max-width: 480px) {
+            .reveal {
+                font-size: 24px;
+            }
+
+            .reveal h3 {
+                font-size: 1.1em;
+            }
+
+            .reveal .main-image {
+                max-height: 50vh !important;
+            }
+
+            .reveal .metro-image {
+                width: 100% !important;
+                max-width: none !important;
+                max-height: 55vh !important;
+            }
+
+            .reveal .graph-image {
+                max-height: 60vh !important;
+            }
+
+            .reveal .document-image {
+                width: 100% !important;
+                max-height: 55vh !important;
+            }
+
+            .reveal .image-caption {
+                font-size: 0.45em !important;
+            }
+        }
+
+        /* Smartphones en paysage */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .reveal {
+                font-size: 28px;
+            }
+
+            .reveal .main-image {
+                max-height: 60vh !important;
+            }
+
+            .reveal .metro-image {
+                width: 100% !important;
+                max-height: 65vh !important;
+            }
+        }
+
+        /* Petits écrans généraux */
+        @media (max-width: 768px) {
+            .reveal .main-image {
+                width: 100%;
+                max-height: 65vh;
+            }
+
+            .reveal .metro-image {
+                width: 100%;
+                max-width: none;
+                max-height: 65vh;
+            }
+
+            .reveal .graph-image {
+                max-height: 72vh;
+            }
+
+            .reveal .document-image {
+                width: 95%;
+                max-height: 60vh;
+            }
+        }
+
+        /* Orientation portrait spécifique */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .reveal .main-image,
+            .reveal .metro-image,
+            .reveal .graph-image {
+                max-height: 54vh !important;
+            }
+        }
+
+        /* Orientation paysage mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .reveal .main-image,
+            .reveal .metro-image,
+            .reveal .graph-image {
+                max-height: 78vh !important;
+            }
+        }
+
+        /* Tablettes */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .reveal .metro-image {
+                max-width: none !important;
+                max-height: 60vh !important;
+            }
+
+            .reveal .graph-image {
+                max-height: 78vh !important;
+            }
+        }
+
+        /* Classe pour le graphe Neo4j de la slide 10 */
+        .reveal .graph-image {
+            width: 100%;
+            max-width: 100%;
+            max-height: 84vh;
+            height: auto;
+            object-fit: contain;
+            margin: 1em auto 0 auto;
+            display: block;
+            transform: scale(1.2);
+            transform-origin: center top;
+        }
+
+        /* Responsive pour très grands écrans */
+        @media (min-width: 1600px) {
+            .reveal .metro-image {
+                max-width: 700px;
+                max-height: 40vh;
+            }
+        }
+
+        /* Caption uniformisée */
+        .reveal .image-caption {
+            font-size: var(--font-size-micro);
+            color: var(--dark-gray);
+            line-height: 1.4;
+            text-align: center;
+            margin-top: var(--spacing-xs);
+            flex-shrink: 0;
+        }
+
+        /* ============================================
+           FOOTNOTES
+           ============================================ */
+
+        .reveal .footnote {
+            margin-top: var(--spacing-lg);
+            font-size: var(--font-size-micro);
+            color: var(--dark-gray);
+            text-align: left;
+            line-height: var(--line-height-body);
+            border-top: 1px solid var(--light-gray);
+            padding-top: var(--spacing-sm);
+            max-width: var(--width-wide);
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ============================================
+           MÉTHODOLOGIE (Slide 7)
+           ============================================ */
+
+        .reveal .methodology-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+            margin: var(--spacing-md) auto;
+            max-width: var(--width-wide);
+            position: relative;
+        }
+
+        .reveal .methodology-section {
+            font-size: var(--font-size-small);
+        }
+
+        .reveal .cli-flow {
+            font-family: 'Courier New', monospace;
+            line-height: var(--line-height-code);
+            color: var(--main-color);
+        }
+
+        .reveal .cli-item {
+            margin: 0.3em 0;
+        }
+
+        .reveal .methodology-legend {
+            font-size: var(--font-size-micro);
+            color: var(--dark-gray);
+            font-style: italic;
+            margin-top: var(--spacing-md);
+            padding-top: var(--spacing-sm);
+            border-top: 1px solid var(--light-gray);
+        }
+
+        /* ============================================
+           SECTIONS PRINCIPALES (Part dividers)
+           ============================================ */
+
+        .reveal .part-divider {
+            text-align: center;
+            margin-top: var(--spacing-lg);
+        }
+
+        /* ============================================
+           RÈGLES POUR FUTURES SLIDES
+           ============================================
+
+           1. TEXTE SECONDAIRE : utiliser --font-size-small (0.8em)
+           2. NOTES/CAPTIONS/FOOTNOTES : --font-size-micro (0.6em)
+           3. ESPACEMENT : xs/sm/md/lg (0.5em/1em/2em/3em)
+           4. MAX-WIDTH : narrow/standard/wide (75%/85%/90%)
+           5. LINE-HEIGHT : headings (1.2) / body (1.6) / code (1.8)
+           6. BORDURE GAUCHE : toujours 4px solid accent
+           7. BACKGROUND : toujours light-gray
+           8. PADDING : toujours sm (1em) + md (2em)
+
+           ============================================ */
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- Slide 1: Titre -->
+            <section class="title-slide">
+                <div style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+                    <div>
+                        <h1 style="margin-bottom: var(--spacing-sm); color: var(--main-color); position: relative; padding-bottom: 0.3em;">
+                            Visualisation de l'incertitude des sources
+                            <div style="width: 120px; height: 4px; background: var(--accent-color); margin: 0.3em auto 0 auto;"></div>
+                        </h1>
+                        <h2 style="margin-bottom: var(--spacing-md);">Flux de travail numériques avec modèles de langage (locaux) et Graph RAG - Phase 4 selon Gasser et Sibille<sup>1</sup></h2>
+
+                        <div class="author-info" style="margin-bottom: var(--spacing-sm); margin-top: var(--spacing-md); padding: var(--spacing-sm) var(--spacing-md); border-left: 3px solid var(--accent-color); background: rgba(52, 152, 219, 0.03);">
+                            <div style="font-size: 0.9em; font-weight: 500; color: var(--accent-color); margin-bottom: 0.2em;">Gérard Bottazzoli</div>
+                            <div class="affiliation" style="font-size: 0.75em;">Étudiant filière Master of Arts in Historical Sciences</div>
+                            <div class="affiliation" style="font-size: 0.75em;">Séminaire de recherche de la faculté d'Histoire d'UniDistance Suisse, 14 novembre 2025</div>
+                        </div>
+                    </div>
+
+                    <div style="font-size: var(--font-size-micro); color: var(--dark-gray); text-align: left; line-height: 1.3; flex-shrink: 0;">
+                        <sup>1</sup> Kluttig, Thekla. « „KI im Archiv". Eindrücke vom 29. Archivwissenschaftlichen Kolloquium in Marburg ». <em>SAXARCHIV-Blog</em>, 9 juin 2025. https://doi.org/10.58079/142qt.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 2: Statistiques du corpus -->
+            <section>
+                <h3 style="margin-bottom: var(--spacing-sm);">Le corpus documentaire</h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); margin: var(--spacing-sm) auto; max-width: var(--width-wide); font-size: var(--font-size-small);">
+
+                    <!-- Colonne gauche: Sources -->
+                    <div>
+                        <h5 style="margin-bottom: var(--spacing-xs);">Sources archivistiques</h5>
+                        <div class="cli-flow" style="font-size: 1em;">
+                            <div class="cli-item" style="margin-bottom: 0.5em;"><strong>192</strong> documents d'archives</div>
+                            <div class="cli-item" style="margin-bottom: 0.5em;"><strong>836</strong> segments textuels (chunks)</div>
+                            <div class="cli-item" style="margin-bottom: 0.5em;"><strong>852</strong> assertions extraites</div>
+                            <div class="cli-item" style="margin-bottom: 0.5em;"><strong>234</strong> événements reconstitués</div>
+                        </div>
+                    </div>
+
+                    <!-- Colonne droite: Architecture -->
+                    <div>
+                        <h5 style="margin-bottom: var(--spacing-xs);">Architecture Neo4j</h5>
+                        <div class="cli-flow" style="font-size: 1em;">
+                            <div class="cli-item" style="margin-bottom: 0.5em;"><strong>3,118</strong> nœuds</div>
+                            <div class="cli-item" style="margin-bottom: 0.5em;"><strong>12,297</strong> relations</div>
+                            <div class="cli-item" style="margin-bottom: 0.5em;"><strong>95,5%</strong> couverture "quote-first"</div>
+                            <div class="cli-item" style="margin-bottom: 0.5em;"><strong>69</strong> personnes identifiées</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div style="font-size: var(--font-size-small); color: var(--dark-gray); text-align: center; margin-top: var(--spacing-sm); line-height: 1.5;">
+                    <p style="margin: 0.3em 0;"><strong>Corpus principal :</strong> AFS E4320B#1987/187#1705*</p>
+                    <p style="margin: 0.3em 0;"><strong>Corpus secondaire :</strong> 2 cotes issues des AFS, 18 documents</p>
+                    <p style="margin: 0.3em 0;"><strong>Pièces externes :</strong> 2 pièces (archives et banque de données en ligne)</p>
+                </div>
+            </section>
+
+            <!-- Slide 3: Citation Pollin - Incertitude -->
+            <section>
+                <blockquote>
+                    Uncertainty is an inherent property of historical information and manifests itself as
+                    <span class="highlight-term">vagueness</span>,
+                    <span class="highlight-term">inconsistency</span>,
+                    <span class="highlight-term">incompleteness</span>,
+                    <span class="highlight-term">polyvalence</span> and
+                    <span class="highlight-term">negation</span>.
+
+                    <div class="citation-source">
+                        — Christopher Pollin<sup>2</sup>, p. 38
+                    </div>
+                </blockquote>
+
+                <div class="footnote">
+                    <sup>2</sup> Pollin, Christopher. <em>Modelling, Operationalising and Exploring Historical Information. Using Historical Financial Sources as an Example</em>. 2025. http://unipub.uni-graz.at/obvugrhs/12127700.
+                </div>
+            </section>
+
+            <!-- Slide 4: Structure de l'exposé -->
+            <section>
+                <h3>Structure de l'exposé</h3>
+                <ul class="structure-list" style="display: flex; flex-direction: column; align-items: center;">
+                    <li><span class="part-number">Partie 1 :</span> Traçabilité des sources et priorité à la citation</li>
+                    <li><span class="part-number">Partie 2 :</span> Visualisation et exploitation de l'incertitude des sources</li>
+                </ul>
+            </section>
+
+            <!-- Slide 5: Carte parcours carcéral -->
+            <section>
+                <h3 style="margin-bottom: var(--spacing-xs);">Contextualisation historique (1)</h3>
+
+                <div class="image-slide-container" style="height: calc(100% - 2em);">
+                    <img src="images/carte_grand_reich_1944_prisons.png" alt="Parcours carcéral d'Elisabeth Müller 1941-1945" class="main-image">
+
+                    <div class="image-caption">
+                        Carte générée par Claude Sonnet 4.5 • <strong>Contours historiques du Großdeutsches Reich 1944</strong> (Wikimedia Commons, USHMM) • <strong>Données Neo4j</strong> : parcours carcéral d'Elisabeth Müller (1941-1945)
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 6: Contextualisation historique (2) - Commission KNV -->
+            <section>
+                <h3 style="margin-bottom: var(--spacing-xs);">Contextualisation historique (2)</h3>
+                <h4 style="margin-bottom: var(--spacing-xs); font-size: 0.85em;">La Commission "allocations anticipées à des Suisses victimes de la persécution nationale-socialiste" (KNV), selon l'arrêté fédéral du 20 sept. 1957<sup>3</sup></h4>
+
+                <div class="image-slide-container" style="height: calc(100% - 3.5em);">
+                    <img src="images/dossier_archives_muller.png" alt="Dossier d'archives Elisabeth Müller" class="document-image">
+
+                    <div class="image-caption">
+                        AFS, E4320B#1987/187#1705*, couverture du dossier d'archives provenant de 1987/00187 Bundesanwaltschaft (Bern) (1908-1980)
+                    </div>
+
+                    <div class="footnote" style="position: absolute; bottom: 20px; left: 20px; right: 20px;">
+                        <sup>3</sup> Arrêté fédéral du 20 septembre 1957 concernant l'allocation d'indemnités à des Suisses victimes de la persécution nationale-socialiste.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 7: Contextualisation historique (3) - Citation et Selbstverschuldung -->
+            <section>
+                <h3 style="margin-bottom: var(--spacing-xs);">Contextualisation historique (3)</h3>
+
+                <div class="image-slide-container" style="height: calc(100% - 2em);">
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+                        <img src="images/citation_selbstverschuldung.png" alt="Citation originale - Selbstverschuldung" class="document-image">
+
+                        <div class="image-caption" style="margin-top: var(--spacing-xs);">
+                            Source : AFS, E4320B#1987/187#1705*, visite du Consul de Düsseldorf à Anrath du 18 juin 1942, rapporté par la commission le 16 avril 1958.
+                        </div>
+
+                        <p style="font-size: var(--font-size-small); margin: var(--spacing-xs) 0 0 0; text-align: center; color: var(--main-color);">
+                            Preuve de <strong>« Selbstverschuldung »</strong> (auto-responsabilité)<sup>4</sup>
+                        </p>
+                    </div>
+
+                    <div style="font-size: var(--font-size-micro); color: var(--dark-gray); line-height: 1.3; flex-shrink: 0; margin-top: var(--spacing-sm);">
+                        <sup>4</sup> Altermatt, Urs et Späti, Christina. « Neutralität statt Moralität... », in: Hockerts et al., <em>Grenzen der Wiedergutmachung</em>, Göttingen 2006, pp. 542-558.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 8: Problématiques méthodologiques -->
+            <section>
+                <h3 style="margin-bottom: var(--spacing-xs);">Problématiques méthodologiques</h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); margin: var(--spacing-xs) auto; max-width: var(--width-wide); position: relative; font-size: var(--font-size-small);">
+                    <!-- Colonne gauche: Circularité -->
+                    <div>
+                        <h5 style="margin-bottom: var(--spacing-xs);">Circularité</h5>
+                        <div class="cli-flow">
+                            <div class="cli-item">Événements 1941-1945</div>
+                            <div class="cli-item">          ↓</div>
+                            <div class="cli-item">Résumés diplomatiques</div>
+                            <div class="cli-item">          ↓</div>
+                            <div class="cli-item">Commission KNV (1958)</div>
+                            <div class="cli-item">          ↓</div>
+                            <div class="cli-item">Notre analyse (2025)</div>
+                            <div class="cli-item" style="margin-top: 0.6em;">          ↑</div>
+                            <div class="cli-item" style="color: var(--accent-color); font-weight: 600;">(risque de circularité)</div>
+                        </div>
+                    </div>
+
+                    <!-- Colonne droite: Sources contemporaines -->
+                    <div>
+                        <h5 style="margin-bottom: var(--spacing-xs);">Sources contemporaines 1941-1945</h5>
+
+                        <div class="cli-flow" style="margin-bottom: 1.5em;">
+                            <div class="cli-item" style="font-weight: 600; margin-bottom: 0.4em;">Quote-first</div>
+                            <div class="cli-item">  → Qui dit quoi ?</div>
+                            <div class="cli-item">  → Traçabilité sources</div>
+                        </div>
+
+                        <div class="cli-flow">
+                            <div class="cli-item" style="font-weight: 600; margin-bottom: 0.4em;">Triple incertitude</div>
+                            <div class="cli-item">  • Temporelle (dates estimées)</div>
+                            <div class="cli-item">  • Factuelle (confiance variable)</div>
+                            <div class="cli-item">  • Provenance (sources indirectes)</div>
+                        </div>
+                    </div>
+
+                    <!-- Flèche pointillée SVG corrigée -->
+                    <svg style="position: absolute; width: 100%; height: 100%; pointer-events: none; top: 0; left: 0;">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#7f8c8d" opacity="0.6" />
+                            </marker>
+                        </defs>
+                        <path d="M 42% 78%, Q 50% 45%, 58% 20%"
+                              stroke="#7f8c8d"
+                              stroke-width="1.5"
+                              fill="none"
+                              stroke-dasharray="5,5"
+                              opacity="0.6"
+                              marker-end="url(#arrowhead)" />
+                    </svg>
+                </div>
+
+                <div style="font-size: var(--font-size-micro); color: var(--dark-gray); font-style: italic; margin-top: var(--spacing-xs); line-height: 1.4;">
+                    La prise de conscience du risque de circularité de l'information a conduit à une critique plus détaillée des sources et à la modélisation de l'incertitude
+                </div>
+            </section>
+
+            <!-- Slide 9: Partie 1 - Graphe de connaissance et traçabilité -->
+            <section style="text-align: center;">
+                <h3 style="margin: 0 0 var(--spacing-sm) 0; padding-top: 0; font-size: 1.1em; color: var(--accent-color);">Partie 1 : Graphe de connaissance et traçabilité des sources</h3>
+
+                <div style="display: flex; flex-direction: column; height: calc(100% - 2.5em); justify-content: space-between; min-height: 0;">
+                    <div style="text-align: center; flex-shrink: 1; min-height: 0;">
+                        <img src="images/grandjean_metro.png" alt="Analogie graphe de connaissance - métro parisien (Grandjean)" class="metro-image" style="margin-bottom: var(--spacing-xs);">
+
+                        <div style="text-align: center; font-size: var(--font-size-small); color: var(--dark-gray);">
+                            <strong>Analogie du métro parisien</strong> : nœuds (stations) connectés par des relations (lignes).<sup>5</sup>
+                        </div>
+                    </div>
+
+                    <div style="font-size: var(--font-size-micro); color: var(--dark-gray); line-height: 1.3; flex-shrink: 0; margin-top: auto; padding-top: var(--spacing-xs);">
+                        <sup>5</sup> Grandjean, Martin. « Introduction à la visualisation de données : l'analyse de réseau en histoire ». <em>Geschichte und Informatik</em>, n° 18/19 (2015): 109-28, p. 124.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 10: Connecter des entités -->
+            <section>
+                <h3 style="margin-bottom: var(--spacing-xs);">Connecter des entités (personnes, organisations, lieux)</h3>
+
+                <div class="image-slide-container" style="height: calc(100% - 2em);">
+                    <img src="images/graphe_montavon_muller.png" alt="Graphe Montavon-Müller" class="graph-image">
+
+                    <div class="image-caption">
+                        <strong>Graphique produit dans Neo4j</strong> •
+                        <span style="color: #ff8c00; font-weight: 600;">●</span> Personne
+                        <span style="color: #2ecc71; font-weight: 600;">●</span> Document
+                        <span style="color: #3498db; font-weight: 600;">●</span> Assertion
+                        <span style="color: #e74c3c; font-weight: 600;">●</span> Événement
+                        <span style="color: #9b59b6; font-weight: 600;">●</span> Chunks
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 11: Deuxième niveau - Connecter des événements aux sources -->
+            <section>
+                <h3>Connecter des événements aux sources</h3>
+
+                <!-- Requête Cypher en haut -->
+                <div style="font-family: 'Courier New', monospace; background-color: #f8f9fa; border: 2px solid #333; border-radius: 8px; padding: 0.5em 1em; margin: 0.5em auto 1em auto; max-width: 90%; text-align: center; font-size: 0.65em;">
+                    MATCH (e)&lt;-[:CLAIMS]-(a:Assertion)&lt;-[:SUPPORTS]-(d:ArchiveDocument)
+                </div>
+
+                <!-- Variables à gauche et schéma avec bulles -->
+                <div style="display: flex; align-items: center; justify-content: center; margin: 0.5em auto 1em auto; max-width: 95%;">
+                    <!-- Variables -->
+                    <div style="font-size: 0.5em; margin-right: 1.5em; text-align: left; line-height: 1.8;">
+                        <div><strong>Variables :</strong></div>
+                        <div style="margin-top: 0.5em;">e = Event</div>
+                        <div>a = Assertion</div>
+                        <div>d = ArchiveDocument</div>
+                    </div>
+
+                    <!-- Schéma avec bulles -->
+                    <div style="display: flex; align-items: center; gap: 1.5em;">
+                        <!-- Event (orange) -->
+                        <div style="text-align: center;">
+                            <div style="width: 120px; height: 120px; border-radius: 50%; background-color: #ff8c00; display: flex; align-items: center; justify-content: center; font-size: 2.5em; color: white; font-weight: bold;">e</div>
+                            <div style="margin-top: 0.5em; font-size: 0.6em; font-weight: 600;">Event</div>
+                        </div>
+
+                        <!-- Flèche CLAIMS -->
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <div style="font-family: 'Courier New', monospace; background-color: #f0f0f0; border: 1px solid #999; border-radius: 4px; padding: 0.2em 0.5em; font-size: 0.5em; margin-bottom: 0.3em;">CLAIMS</div>
+                            <div style="font-size: 2em; color: #333;">←</div>
+                        </div>
+
+                        <!-- Assertion (bleu) -->
+                        <div style="text-align: center;">
+                            <div style="width: 120px; height: 120px; border-radius: 50%; background-color: #3498db; display: flex; align-items: center; justify-content: center; font-size: 2.5em; color: white; font-weight: bold;">a</div>
+                            <div style="margin-top: 0.5em; font-size: 0.6em; font-weight: 600;">Assertion</div>
+                        </div>
+
+                        <!-- Flèche SUPPORTS -->
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <div style="font-family: 'Courier New', monospace; background-color: #f0f0f0; border: 1px solid #999; border-radius: 4px; padding: 0.2em 0.5em; font-size: 0.5em; margin-bottom: 0.3em;">SUPPORTS</div>
+                            <div style="font-size: 2em; color: #333;">←</div>
+                        </div>
+
+                        <!-- ArchiveDocument (vert) -->
+                        <div style="text-align: center;">
+                            <div style="width: 120px; height: 120px; border-radius: 50%; background-color: #2ecc71; display: flex; align-items: center; justify-content: center; font-size: 2.5em; color: white; font-weight: bold;">d</div>
+                            <div style="margin-top: 0.5em; font-size: 0.6em; font-weight: 600;">ArchiveDocument</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Texte de chaînage -->
+                <div style="text-align: center; font-style: italic; font-size: 0.55em; color: var(--dark-gray); margin: 0.8em auto 1em auto;">
+                    Chaînage de traçabilité : Document → Assertion → Événement
+                </div>
+
+                <!-- Citation exemple -->
+                <div style="background-color: #f8f9fa; border-left: 3px solid var(--accent-color); padding: 0.6em 1em; margin: 0.5em auto 0 auto; max-width: 85%; font-size: 0.5em; font-family: 'Courier New', monospace; line-height: 1.6;">
+                    « Ihnen mitzuteilen, dass Müller Elisabeth, geboren 1896-10-12, von Schaffhausen und Basel,
+                    in der Tat im 1941-08-01 von den deutschen Behörden in Paris wegen Spionage verhaftet wurde.
+                    Am 1942-03-30 wurde sie zum Tode verurteilt... »
+                </div>
+
+                <div style="text-align: center; font-size: 0.45em; color: var(--dark-gray); margin-top: 0.4em; line-height: 1.5;">
+                    Exemple de citation (source_quote) extraite d'un ArchiveDocument et stockée dans une Assertion<br>
+                    <em>AFS, E4320B#1987/187#1705*, courrier de la Division des affaires étrangères au Consulat au Tribunal pénal de Berne, 22 octobre 1945</em>
+                </div>
+            </section>
+
+            <!-- Slide 12: Partie 2 - Visualisation de la triple incertitude -->
+            <section class="part-divider">
+                <h3 style="margin-bottom: var(--spacing-sm);">Partie 2 : Visualisation de la triple incertitude</h3>
+
+                <blockquote style="margin: var(--spacing-sm) auto; padding: var(--spacing-sm) var(--spacing-md);">
+                    Cet article introduit la distinction entre visualisation de démonstration et visualisation de recherche, rappelant que le/la chercheur·euse ne doit pas uniquement utiliser la visualisation comme moyen de communication, mais également pour nourrir la recherche elle-même.
+
+                    <div class="citation-source" style="margin-top: var(--spacing-sm);">
+                        — Martin Grandjean<sup>5</sup>
+                    </div>
+                </blockquote>
+
+                <div class="footnote" style="margin-top: var(--spacing-sm);">
+                    <sup>5</sup> Grandjean, Martin. « Introduction à la visualisation de données : l'analyse de réseau en histoire ». <em>Geschichte und Informatik</em>, n° 18/19 (2015): 109-28.
+                </div>
+            </section>
+
+            <!-- Slide 13: Lien vers la visualisation interactive -->
+            <section>
+                <h3 style="margin-bottom: var(--spacing-sm);">De la traçabilité à la visualisation</h3>
+
+                <div style="font-size: var(--font-size-small); max-width: var(--width-standard); margin: 0 auto var(--spacing-sm) auto; line-height: var(--line-height-body);">
+                    <p style="margin-bottom: var(--spacing-sm);">
+                        Maintenant que nous avons un moyen de tracer rigoureusement chaque information, de l'extraction à la citation, à la source et son origine archivistique, <strong>comment l'explorer ?</strong>
+                    </p>
+
+                    <p style="margin-bottom: var(--spacing-sm);">
+                        <strong>Le "protoprompting"</strong> (Christopher Pollin) : plutôt que développer des interfaces visuelles lourdes, créer des visualisations flexibles au moyen des modèles de langage.
+                    </p>
+
+                    <p style="margin-bottom: var(--spacing-sm); font-style: italic; color: var(--dark-gray);">
+                        "Montre-moi les événements attestés en rouge et les informations rapportées en bleu sur une timeline"
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin-top: var(--spacing-md);">
+                    <a href="https://gbottazzoli.github.io/timeline_visualization_public/" target="_blank" style="display: inline-block; background-color: var(--accent-color); color: white; padding: var(--spacing-sm) var(--spacing-md); border-radius: 8px; text-decoration: none; font-weight: 600; font-size: var(--font-size-body);">
+                        → Accéder à la visualisation interactive
+                    </a>
+                </div>
+
+                <div style="text-align: center; margin-top: var(--spacing-xs); font-size: var(--font-size-micro); color: var(--dark-gray);">
+                    Documentation : <a href="https://github.com/gbottazzoli/timeline_visualization_public" target="_blank">github.com/gbottazzoli/timeline_visualization_public</a>
+                </div>
+            </section>
+
+            <!-- Slide 14: Conclusion (1) -->
+            <section>
+                <h3 style="margin-bottom: var(--spacing-sm);">Conclusion (1)</h3>
+
+                <div style="font-size: var(--font-size-small); max-width: var(--width-standard); margin: 0 auto; line-height: 1.5;">
+
+                    <!-- Potentiel de la méthode -->
+                    <div style="margin-bottom: var(--spacing-md);">
+                        <h4 style="color: var(--accent-color); font-weight: 600; margin-bottom: var(--spacing-xs); font-size: 1em;">Potentiel de la méthode</h4>
+                        <ul style="list-style: none; padding-left: 0; margin: 0;">
+                            <li style="margin-bottom: 0.25em;">• Graphe sous-exploité → autres cas = analyse quantitative (trous informationnels)</li>
+                            <li style="margin-bottom: 0.25em;">• Protoprompting + Claude Code : mesurer, révéler, adapter la visualisation</li>
+                            <li style="margin-bottom: 0.25em;">• Interfaces conversationnelles : apprentissage et prototypage rapide</li>
+                        </ul>
+                    </div>
+
+                    <!-- Développements futurs -->
+                    <div style="margin-bottom: var(--spacing-sm);">
+                        <h4 style="color: var(--accent-color); font-weight: 600; margin-bottom: var(--spacing-xs); font-size: 1em;">Développements futurs</h4>
+                        <ul style="list-style: none; padding-left: 0; margin: 0;">
+                            <li style="margin-bottom: 0.25em;">• OCR local : Nanonets-OCR2-3B (manuscrit + multilingue)</li>
+                            <li style="margin-bottom: 0.25em;">• NER fine-tuning Bert : généralisation Europe de l'est ?</li>
+                            <li style="margin-bottom: 0.25em;">• Modèles distillés 8b + graphe → extraction locale (sans API)</li>
+                            <li style="margin-bottom: 0.25em; font-style: italic;">• retour au minimal computing ?</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Slide 15: Conclusion (2) -->
+            <section>
+                <div style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+                    <div>
+                        <h3 style="margin-bottom: var(--spacing-sm);">Conclusion (2)</h3>
+
+                        <div style="font-size: var(--font-size-small); max-width: var(--width-standard); margin: 0 auto; line-height: 1.5;">
+
+                            <!-- Points de conclusion -->
+                            <div style="margin-bottom: var(--spacing-md);">
+                                <ul style="list-style: none; padding-left: 0; margin: 0;">
+                                    <li style="margin-bottom: 0.4em;">• Piège fondamental : LLM (interface conversationnelle) lisse l'information</li>
+                                    <li style="margin-bottom: 0.4em;">• Travail historique : traquer incohérences, relever doutes, analyser incertitudes des sources</li>
+                                    <li style="margin-bottom: 0.4em;">• "Contre-architecture" pour un LLM</li>
+                                    <li style="margin-bottom: 0.4em;">• LLM génère des outils d'analyse (outil) ≠ produit l'analyse elle-même (méthode)</li>
+                                </ul>
+                            </div>
+
+                            <!-- Remerciements -->
+                            <div style="text-align: center; margin-top: var(--spacing-lg); font-style: italic; color: var(--dark-gray); font-size: var(--font-size-body);">
+                                Merci pour votre attention.
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Note protoprompting -->
+                    <div style="text-align: center; font-size: var(--font-size-micro); color: var(--accent-color); line-height: 1.3; flex-shrink: 0; margin-top: auto;">
+                        Présentation générée par <em>protoprompting</em> via Claude Code.
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Reveal.js JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.js"></script>
+
+    <script>
+        Reveal.initialize({
+            hash: true,
+            center: true,
+            transition: 'slide',
+            width: 1280,
+            height: 720,
+            margin: 0.1,
+            minScale: 0.2,
+            maxScale: 2.0,
+            slideNumber: 'c/t',  // Format: current/total
+            showSlideNumber: 'all'
+        });
+    </script>
+</body>
+</html>
